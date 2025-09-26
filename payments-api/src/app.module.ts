@@ -5,6 +5,7 @@ import { AppService } from './app.service';
 import { PaymentsModule } from './payments/payments.module';
 import { TemporalModule } from './temporal/temporal.module';
 import { MercadoPagoWebhookController } from './webhooks/mercadopago.webhook';
+import { PrismaService } from './infra/prisma/prisma.service';
 
 @Module({
   imports: [
@@ -15,6 +16,6 @@ import { MercadoPagoWebhookController } from './webhooks/mercadopago.webhook';
     TemporalModule,
   ],
   controllers: [AppController, MercadoPagoWebhookController],
-  providers: [AppService],
+  providers: [AppService, PrismaService],
 })
 export class AppModule {}

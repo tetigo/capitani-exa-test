@@ -34,12 +34,16 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 const worker_1 = require("@temporalio/worker");
+const worker_2 = require("@temporalio/worker");
 const activities = __importStar(require("./activities"));
 async function run() {
     worker_1.Runtime.install({ logger: new worker_1.DefaultLogger('WARN') });
     const taskQueue = process.env.TEMPORAL_TASK_QUEUE ?? 'payments-task-queue';
     const namespace = process.env.TEMPORAL_NAMESPACE ?? 'default';
+    const address = process.env.TEMPORAL_ADDRESS ?? 'localhost:7233';
+    const connection = await worker_2.NativeConnection.connect({ address });
     const worker = await worker_1.Worker.create({
+        connection,
         workflowsPath: require.resolve('./workflows'),
         activities,
         taskQueue,
