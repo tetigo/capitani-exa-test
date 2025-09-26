@@ -355,3 +355,68 @@ npm run worker
 npm install
 npm run start:dev
 ```
+
+## 🧪 Testes
+
+### Testes da API (Recomendado)
+Execute os testes abaixo para verificar todos os endpoints:
+
+### Testes Manuais com cURL
+
+**1. Verificar se API está rodando:**
+```bash
+curl http://localhost:3000/v1/
+```
+
+**2. Criar pagamento PIX:**
+```bash
+curl -X POST http://localhost:3000/v1/payment \
+  -H "Content-Type: application/json" \
+  -d '{
+    "cpf": "12345678901",
+    "description": "Teste PIX",
+    "amount": 50.00,
+    "paymentMethod": "PIX"
+  }'
+```
+
+**3. Criar pagamento Cartão de Crédito:**
+```bash
+curl -X POST http://localhost:3000/v1/payment \
+  -H "Content-Type: application/json" \
+  -d '{
+    "cpf": "12345678901",
+    "description": "Teste Cartão",
+    "amount": 100.00,
+    "paymentMethod": "CREDIT_CARD"
+  }'
+```
+
+**4. Listar pagamentos:**
+```bash
+curl http://localhost:3000/v1/payment
+```
+
+**5. Buscar pagamento por ID:**
+```bash
+curl http://localhost:3000/v1/payment/{ID_DO_PAGAMENTO}
+```
+
+**6. Atualizar pagamento:**
+```bash
+curl -X PUT http://localhost:3000/v1/payment/{ID_DO_PAGAMENTO} \
+  -H "Content-Type: application/json" \
+  -d '{
+    "status": "PAID"
+  }'
+```
+
+### Testes Unitários
+```bash
+npm run test
+```
+
+### Testes E2E
+```bash
+npm run test:e2e
+```
