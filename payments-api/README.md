@@ -64,7 +64,8 @@ npm run dev:setup
 npm run start:dev
 
 # Terminal 2: Worker
-npm run dev:full
+npm run build
+npm run worker
 
 # Terminal 3: Logs (opcional)
 docker compose logs -f
