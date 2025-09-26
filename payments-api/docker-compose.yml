@@ -1,0 +1,43 @@
+services:
+  db:
+    image: postgres:16
+    container_name: payments_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: payments
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d payments"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  adminer:
+    image: adminer
+    container_name: payments_adminer
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+
+  temporal:
+    image: temporalio/auto-setup:1.22.0
+    container_name: payments_temporal
+    ports:
+      - "7233:7233"
+      - "8081:8080"
+    environment:
+      - DB=postgresql
+      - DB_PORT=5432
+      - POSTGRES_USER=postgres
+      - POSTGRES_PWD=postgres
+      - POSTGRES_SEEDS=db
+    depends_on:
+      - db
+
+volumes:
+  db_data:
