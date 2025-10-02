@@ -15,18 +15,21 @@ datasource db {
 }
 
 model Payment {
-  id             String        @id @default(uuid())
-  cpf            String
-  description    String
-  amount         Decimal       @db.Decimal(10, 2)
-  paymentMethod  PaymentMethod
-  status         PaymentStatus @default(PENDING)
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
+  id                      String        @id @default(uuid())
+  cpf                     String
+  description             String
+  amount                  Decimal       @db.Decimal(10, 2)
+  paymentMethod           PaymentMethod
+  status                  PaymentStatus @default(PENDING)
+  mercadoPagoPreferenceId String?
+  checkoutUrl             String?
+  createdAt               DateTime      @default(now())
+  updatedAt               DateTime      @updatedAt
 
   @@index([cpf])
   @@index([paymentMethod])
   @@index([status])
+  @@index([mercadoPagoPreferenceId])
 }
 
 enum PaymentMethod {

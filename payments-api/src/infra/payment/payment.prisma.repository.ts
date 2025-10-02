@@ -53,6 +53,8 @@ export class PaymentPrismaRepository implements PaymentRepository {
     amount: Number(row.amount),
     paymentMethod: row.paymentMethod,
     status: row.status,
+    mercadoPagoPreferenceId: row.mercadoPagoPreferenceId,
+    checkoutUrl: row.checkoutUrl,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   });

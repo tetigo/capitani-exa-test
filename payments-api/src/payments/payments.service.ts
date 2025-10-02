@@ -28,19 +28,19 @@ export class PaymentsService {
     const created = await this.repo.create(entity);
 
     if (input.paymentMethod === PaymentMethodDto.CREDIT_CARD) {
-      await this.mp.createPreference({
-        description: input.description,
-        amount: input.amount,
-        external_reference: created.id,
-        notification_url: process.env.MERCADOPAGO_WEBHOOK_URL,
-      });
-      // Start Temporal workflow to await durable confirmation
+      // Start Temporal workflow que vai criar a preference e gerenciar todo o processo
       const client = await this.temporal.getClient();
       const taskQueue = process.env.TEMPORAL_TASK_QUEUE ?? 'payments-task-queue';
+      
       await client.workflow.start(creditCardWorkflow, {
         taskQueue,
         workflowId: `cc-${created.id}`,
-        args: [{ paymentId: created.id }],
+        args: [{
+          paymentId: created.id,
+          description: input.description,
+          amount: input.amount,
+          cpf: input.cpf,
+        }],
       });
     }
 

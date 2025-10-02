@@ -8,6 +8,8 @@ export interface PaymentProps {
   amount: number;
   paymentMethod: PaymentMethod;
   status: PaymentStatus;
+  mercadoPagoPreferenceId?: string;
+  checkoutUrl?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -19,6 +21,8 @@ export class PaymentEntity implements PaymentProps {
   amount: number;
   paymentMethod: PaymentMethod;
   status: PaymentStatus;
+  mercadoPagoPreferenceId?: string;
+  checkoutUrl?: string;
   createdAt: Date;
   updatedAt: Date;
 
@@ -29,6 +33,8 @@ export class PaymentEntity implements PaymentProps {
     this.amount = props.amount;
     this.paymentMethod = props.paymentMethod;
     this.status = props.status;
+    this.mercadoPagoPreferenceId = props.mercadoPagoPreferenceId;
+    this.checkoutUrl = props.checkoutUrl;
     this.createdAt = props.createdAt;
     this.updatedAt = props.updatedAt;
   }
