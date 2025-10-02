@@ -8,7 +8,7 @@ export interface PaymentFilters {
 
 export interface PaymentRepository {
   create(data: Omit<PaymentEntity, 'createdAt' | 'updatedAt'>): Promise<PaymentEntity>;
-  update(id: string, data: Partial<Pick<PaymentEntity, 'status' | 'description' | 'amount'>>): Promise<PaymentEntity>;
+  update(id: string, data: Partial<Pick<PaymentEntity, 'status' | 'description' | 'amount' | 'mercadoPagoPreferenceId' | 'checkoutUrl'>>): Promise<PaymentEntity>;
   findById(id: string): Promise<PaymentEntity | null>;
   findMany(filters: PaymentFilters): Promise<PaymentEntity[]>;
 }

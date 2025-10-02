@@ -6,12 +6,12 @@ API REST para gestão de pagamentos com integração Mercado Pago e orquestraç�
 
 ### Clean Architecture + Temporal.io
 ```
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   Controllers   │    │   Domain Layer   │    │  Infrastructure │
-│                 │    │                  │    │                 │
-│PaymentsController│   │ PaymentEntity    │    │ PrismaService   │
-│WebhookController│    │ PaymentRepo      │    │ MercadoPagoClient│
-└─────────────────┘    └──────────────────┘    └─────────────────┘
+┌──────────────────┐    ┌──────────────────┐    ┌──────────────────┐
+│   Controllers    │    │   Domain Layer   │    │  Infrastructure  │
+│                  │    │                  │    │                  │
+│PaymentsController│    │ PaymentEntity    │    │ PrismaService    │
+│WebhookController │    │ PaymentRepo      │    │ MercadoPagoClient│
+└──────────────────┘    └──────────────────┘    └──────────────────┘
          │                       │                       │
          └───────────────────────┼───────────────────────┘
                                  │
@@ -32,10 +32,11 @@ API REST para gestão de pagamentos com integração Mercado Pago e orquestraç�
 
 #### Cartão de Crédito
 1. `POST /v1/payment` → Cria pagamento `PENDING`
-2. Cria preferência no Mercado Pago
-3. Inicia workflow Temporal para aguardar confirmação
-4. Webhook Mercado Pago → Atualiza status para `PAID`/`FAIL`
-5. Workflow detecta mudança e finaliza
+2. **Temporal Workflow inicia** → Cria preferência no Mercado Pago
+3. **Preference criada** → Salva `preferenceId` e `checkoutUrl` no banco
+4. **Cliente paga** → Mercado Pago envia webhook
+5. **Webhook recebido** → Atualiza status + envia signal para Temporal
+6. **Workflow finaliza** → Envia notificações + logs de auditoria
 
 ## Tecnologias
 
@@ -87,6 +88,7 @@ DATABASE_URL="postgresql://postgres:postgres@localhost:5432/payments?schema=publ
 # Mercado Pago
 MERCADOPAGO_ACCESS_TOKEN="seu_token_aqui"
 MERCADOPAGO_WEBHOOK_URL="http://localhost:3000/v1/webhooks/mercadopago"
+MERCADOPAGO_WEBHOOK_SECRET="seu_webhook_secret_aqui"
 
 # Temporal
 TEMPORAL_ADDRESS="localhost:7233"
@@ -248,10 +250,11 @@ API versionada via URL: `/v1/payment`
 
 ## Temporal.io
 
-- **Workflow**: Orquestra pagamentos com cartão
-- **Activities**: Polling do banco para confirmação
-- **Worker**: Processa workflows
-- **Durabilidade**: Workflows sobrevivem a falhas
+- **Workflow**: Orquestra pagamentos com cartão + integração MercadoPago
+- **Activities**: Criação de preferences, polling, notificações, auditoria
+- **Signals**: Notificação imediata via webhook (+ fallback polling)
+- **Worker**: Processa workflows de forma durável
+- **Durabilidade**: Workflows sobrevivem a falhas e reinicializações
 
 ## Testes
 
@@ -390,6 +393,7 @@ curl -X POST http://localhost:3000/v1/payment \
     "amount": 100.00,
     "paymentMethod": "CREDIT_CARD"
   }'
+# Retorna: payment com checkoutUrl para redirecionar o cliente
 ```
 
 **4. Listar pagamentos:**
@@ -420,3 +424,66 @@ npm run test
 ```bash
 npm run test:e2e
 ```
+
+## 🔄 Fluxo Completo de Pagamento com Cartão
+
+### 1. **Criação do Pagamento**
+```bash
+POST /v1/payment
+{
+  "cpf": "12345678901",
+  "description": "Produto X",
+  "amount": 150.00,
+  "paymentMethod": "CREDIT_CARD"
+}
+```
+
+### 2. **Resposta da API**
+```json
+{
+  "id": "uuid-do-pagamento",
+  "cpf": "12345678901",
+  "description": "Produto X",
+  "amount": 150.00,
+  "paymentMethod": "CREDIT_CARD",
+  "status": "PENDING",
+  "checkoutUrl": "https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=...",
+  "mercadoPagoPreferenceId": "preference-id",
+  "createdAt": "2025-01-02T...",
+  "updatedAt": "2025-01-02T..."
+}
+```
+
+### 3. **Redirecionamento**
+- Cliente é redirecionado para `checkoutUrl`
+- Realiza pagamento no MercadoPago
+- MercadoPago processa o pagamento
+
+### 4. **Webhook Automático**
+```bash
+POST /v1/webhooks/mercadopago
+{
+  "external_reference": "uuid-do-pagamento",
+  "status": "approved"
+}
+```
+
+### 5. **Processamento Interno**
+- ✅ Status atualizado no banco: `PENDING` → `PAID`
+- ✅ Signal enviado para Temporal Workflow
+- ✅ Workflow finaliza imediatamente
+- ✅ Notificação enviada ao cliente
+- ✅ Logs de auditoria registrados
+
+### 6. **Verificação Final**
+```bash
+GET /v1/payment/uuid-do-pagamento
+# Retorna payment com status "PAID"
+```
+
+## 📊 Monitoramento em Tempo Real
+
+- **Temporal UI**: http://localhost:8081 - Acompanhe workflows
+- **Logs da API**: Terminal com `npm run start:dev`
+- **Logs do Worker**: Terminal com `npm run worker`
+- **Banco de Dados**: http://localhost:8080 (Adminer)

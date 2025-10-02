@@ -19,6 +19,14 @@ export class UpdatePaymentDto {
   @IsOptional()
   @IsEnum(PaymentStatusDto)
   status?: PaymentStatusDto;
+
+  @IsOptional()
+  @IsString()
+  mercadoPagoPreferenceId?: string;
+
+  @IsOptional()
+  @IsString()
+  checkoutUrl?: string;
 }
 
 
