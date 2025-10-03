@@ -41,11 +41,18 @@ npm install
 
 ```bash
 docker compose up -d
+
+docker run -d --name payments_db -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=payments -p 5432:5432 postgres:16
+docker run -d --name payments_temporal --link payments_db:db -p 7233:7233 -e DB=postgresql -e DB_PORT=5432 -e POSTGRES_USER=postgres -e POSTGRES_PWD=postgres -e POSTGRES_SEEDS=db temporalio/auto-setup:1.22.0
+docker run -d --name payments_temporal_ui --link payments_temporal:temporal -p 8081:8080 -e TEMPORAL_ADDRESS=payments_temporal:7233 -e TEMPORAL_CORS_ORIGINS=http://localhost:3000 temporalio/ui:2.21.3
+docker run -d --name payments_adminer --link payments_db:db -p 8080:8080 adminer
 ```
 
 ### 4. **Aplicar Migrações do Banco**
 
 ```bash
+npx prisma db push
+
 npx prisma migrate deploy
 # ou para desenvolvimento:
 npx prisma migrate dev

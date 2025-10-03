@@ -8,6 +8,8 @@ class PaymentEntity {
     amount;
     paymentMethod;
     status;
+    mercadoPagoPreferenceId;
+    checkoutUrl;
     createdAt;
     updatedAt;
     constructor(props) {
@@ -17,6 +19,8 @@ class PaymentEntity {
         this.amount = props.amount;
         this.paymentMethod = props.paymentMethod;
         this.status = props.status;
+        this.mercadoPagoPreferenceId = props.mercadoPagoPreferenceId;
+        this.checkoutUrl = props.checkoutUrl;
         this.createdAt = props.createdAt;
         this.updatedAt = props.updatedAt;
     }

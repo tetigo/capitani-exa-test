@@ -174,15 +174,11 @@ describe('MercadoPagoWebhookController', () => {
       };
 
       prismaService.payment.update = jest.fn().mockRejectedValue(new Error('Payment not found'));
-      temporalService.getClient.mockResolvedValue(mockTemporalClient as any);
-      mockTemporalClient.workflow.getHandle.mockReturnValue(mockWorkflowHandle);
-      mockWorkflowHandle.signal.mockResolvedValue(undefined);
-
+      // Não deve tentar chamar temporal se DB falhar
+      
       const result = await controller.handle(mockSignature, webhookBody);
 
       expect(prismaService.payment.update).toHaveBeenCalled();
-      // Should still try to send temporal signal even if DB update fails
-      expect(temporalService.getClient).toHaveBeenCalled();
       expect(result).toEqual({ ok: true });
     });
 

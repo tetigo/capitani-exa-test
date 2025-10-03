@@ -21,6 +21,8 @@ class UpdatePaymentDto {
     description;
     amount;
     status;
+    mercadoPagoPreferenceId;
+    checkoutUrl;
 }
 exports.UpdatePaymentDto = UpdatePaymentDto;
 __decorate([
@@ -39,4 +41,14 @@ __decorate([
     (0, class_validator_1.IsEnum)(PaymentStatusDto),
     __metadata("design:type", String)
 ], UpdatePaymentDto.prototype, "status", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdatePaymentDto.prototype, "mercadoPagoPreferenceId", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdatePaymentDto.prototype, "checkoutUrl", void 0);
 //# sourceMappingURL=update-payment.dto.js.map

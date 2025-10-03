@@ -7,4 +7,6 @@ export declare class UpdatePaymentDto {
     description?: string;
     amount?: number;
     status?: PaymentStatusDto;
+    mercadoPagoPreferenceId?: string;
+    checkoutUrl?: string;
 }

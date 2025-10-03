@@ -7,6 +7,8 @@ export interface PaymentProps {
     amount: number;
     paymentMethod: PaymentMethod;
     status: PaymentStatus;
+    mercadoPagoPreferenceId?: string;
+    checkoutUrl?: string;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -17,6 +19,8 @@ export declare class PaymentEntity implements PaymentProps {
     amount: number;
     paymentMethod: PaymentMethod;
     status: PaymentStatus;
+    mercadoPagoPreferenceId?: string;
+    checkoutUrl?: string;
     createdAt: Date;
     updatedAt: Date;
     constructor(props: PaymentProps);

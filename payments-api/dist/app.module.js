@@ -15,6 +15,7 @@ const payments_module_1 = require("./payments/payments.module");
 const temporal_module_1 = require("./temporal/temporal.module");
 const mercadopago_webhook_1 = require("./webhooks/mercadopago.webhook");
 const prisma_service_1 = require("./infra/prisma/prisma.service");
+const temporalClient_service_1 = require("./temporal/temporalClient.service");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -28,7 +29,7 @@ exports.AppModule = AppModule = __decorate([
             temporal_module_1.TemporalModule,
         ],
         controllers: [app_controller_1.AppController, mercadopago_webhook_1.MercadoPagoWebhookController],
-        providers: [app_service_1.AppService, prisma_service_1.PrismaService],
+        providers: [app_service_1.AppService, prisma_service_1.PrismaService, temporalClient_service_1.TemporalClientService],
     })
 ], AppModule);
 //# sourceMappingURL=app.module.js.map

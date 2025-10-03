@@ -15,20 +15,47 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.MercadoPagoWebhookController = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../infra/prisma/prisma.service");
+const temporalClient_service_1 = require("../temporal/temporalClient.service");
 let MercadoPagoWebhookController = class MercadoPagoWebhookController {
     prisma;
-    constructor(prisma) {
+    temporal;
+    constructor(prisma, temporal) {
         this.prisma = prisma;
+        this.temporal = temporal;
     }
     async handle(signature, body) {
+        console.log('MercadoPago webhook received:', JSON.stringify(body, null, 2));
         const externalRef = body?.data?.id || body?.external_reference || body?.resource?.id || body?.id;
         const status = body?.status === 'approved' ? 'PAID' : 'FAIL';
-        if (!externalRef)
+        if (!externalRef) {
+            console.log('No external reference found in webhook');
             return { ok: true };
-        try {
-            await this.prisma.payment.update({ where: { id: externalRef }, data: { status } });
         }
-        catch (_) {
+        try {
+            await this.prisma.payment.update({
+                where: { id: externalRef },
+                data: {
+                    status,
+                    updatedAt: new Date(),
+                }
+            });
+            console.log(`Payment ${externalRef} status updated to ${status}`);
+            try {
+                const client = await this.temporal.getClient();
+                const workflowId = `cc-${externalRef}`;
+                const handle = client.workflow.getHandle(workflowId);
+                await handle.signal('paymentStatusChanged', {
+                    status,
+                    paymentId: externalRef
+                });
+                console.log(`Signal sent to workflow ${workflowId} with status ${status}`);
+            }
+            catch (temporalError) {
+                console.error(`Error sending signal to Temporal workflow ${externalRef}:`, temporalError);
+            }
+        }
+        catch (dbError) {
+            console.error(`Error updating payment ${externalRef}:`, dbError);
         }
         return { ok: true };
     }
@@ -44,6 +71,7 @@ __decorate([
 ], MercadoPagoWebhookController.prototype, "handle", null);
 exports.MercadoPagoWebhookController = MercadoPagoWebhookController = __decorate([
     (0, common_1.Controller)({ path: 'webhooks/mercadopago', version: '1' }),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        temporalClient_service_1.TemporalClientService])
 ], MercadoPagoWebhookController);
 //# sourceMappingURL=mercadopago.webhook.js.map

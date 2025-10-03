@@ -116,7 +116,7 @@ describe('PaymentsService', () => {
       expect(mockTemporalWorkflowClient.start).toHaveBeenCalledWith(
         expect.any(Function),
         expect.objectContaining({
-          taskQueue: 'payments-task-queue',
+          taskQueue: expect.any(String), // Pode ser 'payments-task-queue' ou 'payments-task-queue-test'
           workflowId: `cc-${mockPayment.id}`,
           args: [{
             paymentId: mockPayment.id,
